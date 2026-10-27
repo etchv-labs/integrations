@@ -1,0 +1,19 @@
+{
+  "name": "n8n-nodes-etchv",
+  "engines": { "node": "24.x" },
+  "version": "0.1.0",
+  "description": "Etchv watermark and detection actions for n8n",
+  "license": "MIT",
+  "homepage": "https://etchv.com/docs/integrations/n8n",
+  "repository": { "type": "git", "url": "git+https://github.com/etchv-labs/integrations.git", "directory": "n8n" },
+  "keywords": ["n8n-community-node-package"],
+  "files": ["dist"],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": ["dist/n8n/credentials/EtchvApi.credentials.js"],
+    "nodes": ["dist/n8n/nodes/Etchv.node.js"]
+  },
+  "scripts": { "build": "tsc -p tsconfig.json && cp nodes/etchv.svg dist/n8n/nodes/etchv.svg", "typecheck": "tsc -p tsconfig.json --noEmit" },
+  "peerDependencies": { "n8n-workflow": "^2.0.0" },
+  "devDependencies": { "@types/node": "^24.13.4", "n8n-workflow": "^2.16.0", "typescript": "~6.0.3" }
+}

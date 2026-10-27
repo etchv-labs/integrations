@@ -1,0 +1,11 @@
+{
+  "url": "{{parameters.result_path}}",
+  "method": "GET",
+  "response": {
+    "valid": "{{statusCode === 200}}",
+    "output": "{{body}}",
+    "error": {
+      "message": "Etchv returned HTTP {{statusCode}}."
+    }
+  }
+}

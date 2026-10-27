@@ -1,0 +1,7 @@
+{
+  "name": "create_batch",
+  "type": "action",
+  "label": "Create Batch",
+  "description": "Watermark up to 100 files sent together in one zip, each with its own reference data, and return the started batch.",
+  "connection": "etchv"
+}

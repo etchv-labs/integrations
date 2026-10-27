@@ -1,0 +1,83 @@
+[
+  {
+    "name": "media",
+    "label": "Media",
+    "type": "select",
+    "required": true,
+    "options": [
+      {
+        "label": "Image",
+        "value": "images"
+      },
+      {
+        "label": "PDF",
+        "value": "documents"
+      },
+      {
+        "label": "Video",
+        "value": "videos"
+      }
+    ]
+  },
+  {
+    "name": "file_name",
+    "label": "File name",
+    "type": "filename",
+    "semantic": "file:name",
+    "required": true
+  },
+  {
+    "name": "file_data",
+    "label": "File data",
+    "type": "buffer",
+    "semantic": "file:data",
+    "required": true
+  },
+  {
+    "name": "reference_data",
+    "label": "Reference data (JSON object)",
+    "type": "text",
+    "required": true,
+    "help": "A nonempty JSON object, for example {\"asset\":\"142\"}."
+  },
+  {
+    "name": "idempotency_key",
+    "label": "Idempotency key",
+    "type": "text",
+    "required": true,
+    "help": "Map a stable source event ID and operation. Reuse the same value on retry.",
+    "validate": {
+      "pattern": "^[A-Za-z0-9_-]{8,128}$"
+    }
+  },
+  {
+    "name": "storage_destination_id",
+    "label": "Storage destination ID",
+    "type": "text",
+    "validate": {
+      "pattern": "^dst_[a-f0-9]{32}$"
+    }
+  },
+  {
+    "name": "storage_key",
+    "label": "Storage key",
+    "type": "text"
+  },
+  {
+    "name": "accelerator",
+    "label": "Accelerator",
+    "type": "select",
+    "default": "cpu",
+    "options": [
+      {
+        "label": "CPU (default)",
+        "value": "cpu"
+      },
+      {
+        "label": "GPU",
+        "value": "gpu"
+      }
+    ],
+    "help": "GPU requires a Business or Enterprise plan and uses 3× credits. If no GPU is ready, the job runs on CPU at normal credits."
+  }
+]

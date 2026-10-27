@@ -1,0 +1,186 @@
+[
+  {
+    "name": "batch_id",
+    "label": "Batch ID",
+    "type": "text"
+  },
+  {
+    "name": "status",
+    "label": "Status",
+    "type": "text"
+  },
+  {
+    "name": "item_count",
+    "label": "Item count",
+    "type": "number"
+  },
+  {
+    "name": "counts",
+    "label": "Counts",
+    "type": "collection",
+    "spec": [
+      {
+        "name": "pending",
+        "label": "Pending",
+        "type": "number"
+      },
+      {
+        "name": "accepted",
+        "label": "Accepted",
+        "type": "number"
+      },
+      {
+        "name": "rejected",
+        "label": "Rejected",
+        "type": "number"
+      },
+      {
+        "name": "succeeded",
+        "label": "Succeeded",
+        "type": "number"
+      },
+      {
+        "name": "failed",
+        "label": "Failed",
+        "type": "number"
+      },
+      {
+        "name": "in_progress",
+        "label": "In progress",
+        "type": "number"
+      }
+    ]
+  },
+  {
+    "name": "credits",
+    "label": "Credits",
+    "type": "collection",
+    "spec": [
+      {
+        "name": "reserved",
+        "label": "Reserved",
+        "type": "number"
+      },
+      {
+        "name": "charged",
+        "label": "Charged",
+        "type": "number"
+      },
+      {
+        "name": "refunded",
+        "label": "Refunded",
+        "type": "number"
+      }
+    ]
+  },
+  {
+    "name": "accelerator",
+    "label": "Accelerator",
+    "type": "text"
+  },
+  {
+    "name": "cancel_requested",
+    "label": "Cancel requested",
+    "type": "boolean"
+  },
+  {
+    "name": "status_url",
+    "label": "Status path",
+    "type": "text"
+  },
+  {
+    "name": "archive",
+    "label": "Zip the results",
+    "type": "boolean"
+  },
+  {
+    "name": "archive_status",
+    "label": "Results zip status",
+    "type": "text"
+  },
+  {
+    "name": "archive_url",
+    "label": "Results zip path",
+    "type": "text"
+  },
+  {
+    "name": "archive_expires_at",
+    "label": "Results zip expires at",
+    "type": "date"
+  },
+  {
+    "name": "created_at",
+    "label": "Created at",
+    "type": "date"
+  },
+  {
+    "name": "started_at",
+    "label": "Started at",
+    "type": "date"
+  },
+  {
+    "name": "completed_at",
+    "label": "Completed at",
+    "type": "date"
+  },
+  {
+    "name": "items",
+    "label": "Items",
+    "type": "array",
+    "spec": {
+      "type": "collection",
+      "spec": [
+        {
+          "name": "index",
+          "label": "Index",
+          "type": "number"
+        },
+        {
+          "name": "filename",
+          "label": "Filename",
+          "type": "text"
+        },
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "text"
+        },
+        {
+          "name": "request_id",
+          "label": "Request ID",
+          "type": "text"
+        },
+        {
+          "name": "error_code",
+          "label": "Error code",
+          "type": "text"
+        },
+        {
+          "name": "error_detail",
+          "label": "Error detail",
+          "type": "text"
+        },
+        {
+          "name": "credits",
+          "label": "Credits",
+          "type": "number"
+        },
+        {
+          "name": "status_url",
+          "label": "Status path",
+          "type": "text"
+        },
+        {
+          "name": "result_url",
+          "label": "Result path",
+          "type": "text"
+        },
+        {
+          "name": "result_expires_at",
+          "label": "Result expires at",
+          "type": "date"
+        }
+      ]
+    }
+  }
+]

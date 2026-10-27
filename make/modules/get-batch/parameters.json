@@ -1,0 +1,12 @@
+[
+  {
+    "name": "batch_id",
+    "label": "Batch ID",
+    "type": "text",
+    "required": true,
+    "help": "Map batch_id from Create Batch. Check about once a minute until status is completed, failed, or cancelled; collect each file with Get Watermarked File and its result_url.",
+    "validate": {
+      "pattern": "^bat_[a-f0-9]{32}$"
+    }
+  }
+]

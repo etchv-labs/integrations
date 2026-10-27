@@ -1,0 +1,29 @@
+{
+  "url": "/watermarks/{{parameters.media}}/async",
+  "method": "POST",
+  "type": "multipart/form-data",
+  "headers": {
+    "Idempotency-Key": "{{parameters.idempotency_key}}"
+  },
+  "qs": {
+    "storage_destination_id": "{{ifempty(parameters.storage_destination_id, undefined)}}",
+    "storage_key": "{{ifempty(parameters.storage_key, undefined)}}",
+    "accelerator": "{{if(parameters.accelerator == 'gpu', 'gpu', undefined)}}"
+  },
+  "body": {
+    "file": {
+      "value": "{{parameters.file_data}}",
+      "options": {
+        "filename": "{{parameters.file_name}}"
+      }
+    },
+    "data": "{{parameters.reference_data}}"
+  },
+  "response": {
+    "output": "{{body}}",
+    "valid": "{{statusCode === 202}}",
+    "error": {
+      "message": "Etchv returned HTTP {{statusCode}}."
+    }
+  }
+}

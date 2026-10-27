@@ -1,0 +1,7 @@
+{
+  "name": "get_job_status",
+  "type": "action",
+  "label": "Get Job Status",
+  "description": "Read the status of a submitted watermark or detection job.",
+  "connection": "etchv"
+}

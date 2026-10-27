@@ -1,0 +1,11 @@
+{
+  "name": "etchv-integrations",
+  "private": true,
+  "engines": { "node": "24.x" },
+  "workspaces": ["n8n", "zapier"],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "test": "npm run build && node --experimental-strip-types --test core/etchv.test.ts n8n/test/node.test.ts zapier/test/actions.test.ts make/contract.test.ts"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "download_asset",
+  "type": "action",
+  "label": "Download Asset",
+  "description": "Download a retained Etchv asset by ID.",
+  "connection": "etchv"
+}

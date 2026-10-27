@@ -1,0 +1,28 @@
+{
+  "url": "/watermarks/batches/{{parameters.batch_id}}",
+  "method": "GET",
+  "response": {
+    "output": {
+      "batch_id": "{{body.batch_id}}",
+      "status": "{{body.status}}",
+      "item_count": "{{body.item_count}}",
+      "counts": "{{body.counts}}",
+      "credits": "{{body.credits}}",
+      "accelerator": "{{body.accelerator}}",
+      "cancel_requested": "{{body.cancel_requested}}",
+      "status_url": "{{body.status_url}}",
+      "archive": "{{body.archive}}",
+      "archive_status": "{{body.archive_status}}",
+      "archive_url": "{{body.archive_url}}",
+      "archive_expires_at": "{{body.archive_expires_at}}",
+      "created_at": "{{body.created_at}}",
+      "started_at": "{{body.started_at}}",
+      "completed_at": "{{body.completed_at}}",
+      "items": "{{if(body.status == 'draft' || body.status == 'expired', undefined, body.items)}}"
+    },
+    "valid": "{{statusCode === 200}}",
+    "error": {
+      "message": "Etchv returned HTTP {{statusCode}}."
+    }
+  }
+}

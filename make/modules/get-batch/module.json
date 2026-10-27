@@ -1,0 +1,7 @@
+{
+  "name": "get_batch",
+  "type": "action",
+  "label": "Get Batch",
+  "description": "Read a batch's status, counts, credits, and each file's status and result path.",
+  "connection": "etchv"
+}

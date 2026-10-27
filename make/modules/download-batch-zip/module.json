@@ -1,0 +1,7 @@
+{
+  "name": "download_batch_zip",
+  "type": "action",
+  "label": "Download Batch Zip",
+  "description": "Download every watermarked file of a finished batch as one zip, with a manifest.json listing the files and any failures. The batch must have been created with Zip the results on.",
+  "connection": "etchv"
+}

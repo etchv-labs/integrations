@@ -1,0 +1,7 @@
+{
+  "name": "get_watermarked_file",
+  "type": "action",
+  "label": "Get Watermarked File",
+  "description": "Download the file from a succeeded watermark job.",
+  "connection": "etchv"
+}

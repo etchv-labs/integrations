@@ -1,0 +1,16 @@
+{
+  "url": "{{parameters.result_path}}",
+  "method": "GET",
+  "response": {
+    "type": "binary",
+    "valid": "{{statusCode === 200}}",
+    "output": {
+      "name": "{{parameters.file_name}}",
+      "data": "{{body}}",
+      "accelerator": "{{headers['x-etchv-accelerator']}}"
+    },
+    "error": {
+      "message": "Etchv returned HTTP {{statusCode}}."
+    }
+  }
+}

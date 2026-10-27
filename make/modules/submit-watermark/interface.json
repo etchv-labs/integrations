@@ -1,0 +1,57 @@
+[
+  {
+    "name": "request_id",
+    "label": "Request ID",
+    "type": "text"
+  },
+  {
+    "name": "status",
+    "label": "Status",
+    "type": "text"
+  },
+  {
+    "name": "operation",
+    "label": "Operation",
+    "type": "text"
+  },
+  {
+    "name": "status_url",
+    "label": "Status path",
+    "type": "text"
+  },
+  {
+    "name": "result_url",
+    "label": "Result path",
+    "type": "text"
+  },
+  {
+    "name": "error_code",
+    "label": "Error code",
+    "type": "text"
+  },
+  {
+    "name": "asset_id",
+    "label": "Asset ID",
+    "type": "text"
+  },
+  {
+    "name": "source_asset_id",
+    "label": "Source asset ID",
+    "type": "text"
+  },
+  {
+    "name": "result_expires_at",
+    "label": "Result expires at",
+    "type": "date"
+  },
+  {
+    "name": "accelerator_requested",
+    "label": "Accelerator requested",
+    "type": "text"
+  },
+  {
+    "name": "accelerator",
+    "label": "Accelerator used",
+    "type": "text"
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "url": "/watermarks/{{parameters.media}}/detect/async",
+  "method": "POST",
+  "type": "multipart/form-data",
+  "headers": {
+    "Idempotency-Key": "{{parameters.idempotency_key}}"
+  },
+  "qs": {
+    "accelerator": "{{if(parameters.accelerator == 'gpu', 'gpu', undefined)}}"
+  },
+  "body": {
+    "file": {
+      "value": "{{parameters.file_data}}",
+      "options": {
+        "filename": "{{parameters.file_name}}"
+      }
+    }
+  },
+  "response": {
+    "output": "{{body}}",
+    "valid": "{{statusCode === 202}}",
+    "error": {
+      "message": "Etchv returned HTTP {{statusCode}}."
+    }
+  }
+}

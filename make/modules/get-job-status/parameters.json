@@ -1,0 +1,12 @@
+[
+  {
+    "name": "status_path",
+    "label": "Status path",
+    "type": "text",
+    "required": true,
+    "help": "Map status_url from Submit Watermark or Submit Detection.",
+    "validate": {
+      "pattern": "^/watermarks/(jobs|detection-jobs)/req_[a-f0-9]{32,64}$"
+    }
+  }
+]

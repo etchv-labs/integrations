@@ -1,0 +1,5 @@
+{
+  "baseUrl": "https://api.etchv.com",
+  "headers": { "X-API-Key": "{{connection.apiKey}}" },
+  "log": { "sanitize": ["request.headers.x-api-key"] }
+}

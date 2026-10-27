@@ -1,0 +1,9 @@
+{
+  "url": "/auth/api-key",
+  "method": "GET",
+  "headers": { "X-API-Key": "{{parameters.apiKey}}" },
+  "log": { "sanitize": ["request.headers.x-api-key"] },
+  "response": {
+    "metadata": { "value": "{{body.organization_id}}", "type": "text" }
+  }
+}

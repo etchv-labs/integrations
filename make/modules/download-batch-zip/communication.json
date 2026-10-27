@@ -1,0 +1,15 @@
+{
+  "url": "/watermarks/batches/{{parameters.batch_id}}/archive",
+  "method": "GET",
+  "response": {
+    "type": "binary",
+    "valid": "{{statusCode === 200}}",
+    "output": {
+      "name": "{{parameters.batch_id}}.zip",
+      "data": "{{body}}"
+    },
+    "error": {
+      "message": "Etchv returned HTTP {{statusCode}}. 202: the batch is still running. 409: the batch has no zip (not started, created without Zip the results, or over 1 GB of results). 410: the zip has expired."
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "url": "/assets/{{parameters.asset_id}}/content",
+  "method": "GET",
+  "response": {
+    "type": "binary",
+    "output": {
+      "name": "{{parameters.file_name}}",
+      "data": "{{body}}"
+    },
+    "error": {
+      "message": "Etchv returned HTTP {{statusCode}}."
+    }
+  }
+}

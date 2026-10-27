@@ -1,0 +1,3 @@
+[
+  { "name": "apiKey", "label": "Etchv API key", "type": "password", "required": true, "help": "Create a scoped key at etchv.com/dashboard/api-keys." }
+]

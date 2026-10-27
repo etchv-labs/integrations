@@ -1,0 +1,7 @@
+{
+  "name": "get_detection_result",
+  "type": "action",
+  "label": "Get Detection Result",
+  "description": "Read the JSON result of a succeeded detection job.",
+  "connection": "etchv"
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "name": "zip_name",
+    "label": "Zip file name",
+    "type": "filename",
+    "semantic": "file:name",
+    "required": true
+  },
+  {
+    "name": "zip_data",
+    "label": "Zip file data",
+    "type": "buffer",
+    "semantic": "file:data",
+    "required": true,
+    "help": "A zip of up to 55 MB holding the images, PDFs, or MP4/MOV videos to watermark. Make's Archive module can create it."
+  },
+  {
+    "name": "items",
+    "label": "Items (JSON array)",
+    "type": "text",
+    "required": true,
+    "help": "One entry for every file in the zip, with its exact path in the zip and nonempty reference data, up to 100. For example [{\"filename\":\"contracts/acme.pdf\",\"data\":{\"recipient\":\"acme\"}}]."
+  },
+  {
+    "name": "idempotency_key",
+    "label": "Idempotency key",
+    "type": "text",
+    "required": true,
+    "help": "Map a stable source event ID. Reuse the same value on retry to get the same batch back.",
+    "validate": {
+      "pattern": "^[A-Za-z0-9_-]{8,128}$"
+    }
+  },
+  {
+    "name": "results_archive",
+    "label": "Zip the results",
+    "type": "boolean",
+    "default": false,
+    "help": "Also zip every watermarked file into one download when the batch finishes."
+  },
+  {
+    "name": "accelerator",
+    "label": "Accelerator",
+    "type": "select",
+    "default": "cpu",
+    "options": [
+      {
+        "label": "CPU (default)",
+        "value": "cpu"
+      },
+      {
+        "label": "GPU",
+        "value": "gpu"
+      }
+    ],
+    "help": "GPU requires a Business or Enterprise plan and uses 3× credits. If no GPU is ready, the job runs on CPU at normal credits."
+  }
+]

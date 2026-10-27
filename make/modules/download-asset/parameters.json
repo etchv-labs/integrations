@@ -1,0 +1,17 @@
+[
+  {
+    "name": "asset_id",
+    "label": "Asset ID",
+    "type": "text",
+    "required": true,
+    "validate": {
+      "pattern": "^ast_[a-f0-9]{64}$"
+    }
+  },
+  {
+    "name": "file_name",
+    "label": "Output file name",
+    "type": "filename",
+    "required": true
+  }
+]

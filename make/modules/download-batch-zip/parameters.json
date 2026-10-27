@@ -1,0 +1,12 @@
+[
+  {
+    "name": "batch_id",
+    "label": "Batch ID",
+    "type": "text",
+    "required": true,
+    "help": "Map batch_id from Create Batch once Get Batch shows archive_status ready. The zip is available for 24 hours.",
+    "validate": {
+      "pattern": "^bat_[a-f0-9]{32}$"
+    }
+  }
+]

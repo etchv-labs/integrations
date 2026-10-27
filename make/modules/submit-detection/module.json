@@ -1,0 +1,7 @@
+{
+  "name": "submit_detection",
+  "type": "action",
+  "label": "Submit Detection",
+  "description": "Submit an image, PDF, or video for watermark detection and return a job receipt.",
+  "connection": "etchv"
+}

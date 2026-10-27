@@ -1,0 +1,19 @@
+[
+  {
+    "name": "result_path",
+    "label": "Result path",
+    "type": "text",
+    "required": true,
+    "help": "Map result_url after job status is succeeded.",
+    "validate": {
+      "pattern": "^/watermarks/jobs/req_[a-f0-9]{32,64}/result$"
+    }
+  },
+  {
+    "name": "file_name",
+    "label": "Output file name",
+    "type": "filename",
+    "required": true,
+    "help": "Use a suitable extension for the original media format."
+  }
+]

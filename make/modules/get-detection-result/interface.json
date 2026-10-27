@@ -1,0 +1,17 @@
+[
+  {
+    "name": "watermarked",
+    "label": "Watermarked",
+    "type": "boolean"
+  },
+  {
+    "name": "watermark_id",
+    "label": "Watermark ID",
+    "type": "text"
+  },
+  {
+    "name": "accelerator",
+    "label": "Accelerator used",
+    "type": "text"
+  }
+]
