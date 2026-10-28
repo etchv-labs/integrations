@@ -1,0 +1,7 @@
+{
+  "name": "create_link",
+  "type": "action",
+  "label": "Create Traceable Link",
+  "description": "Share a file from your Etchv library so each recipient opens their own watermarked copy.",
+  "connection": "etchv"
+}

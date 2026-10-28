@@ -23,7 +23,7 @@ Map a binary file and a stable idempotency key into **Submit Watermark** or
 object. The node returns `status_url` and `result_url`; wait and check the job
 status before collecting the result. A successful detection can return
 `watermarked: false`. A watermarked file arrives in the output's `data` binary
-field. See https://etchv.com/docs/integrations/n8n for the full setup guide.
+field. See https://etchv.com/docs/integrations/n8n?utm_source=n8n&utm_medium=readme&utm_campaign=integrations for the full setup guide.
 
 **Accelerator** defaults to CPU. Choose GPU on a Business or Enterprise plan;
 GPU operations use 3× credits. If no GPU is ready, the job runs on CPU at
@@ -32,6 +32,14 @@ normal credits. Job status and results report the `accelerator` actually used.
 The job result expires after 24 hours. **Download Asset** can retrieve an
 available retained asset using `assets:read`. Never treat a pending `202`
 result as a completed file.
+
+## Traceable links
+
+**Create Traceable Link** shares a file from your Etchv asset library so each
+recipient opens their own watermarked copy. Map the source `asset_id`, a name,
+and recipients' email addresses or allowed domains (separated by commas or line
+breaks), with an idempotency key. The node outputs the link with its `url`; send
+it to your recipients yourself. The key needs `links:write`.
 
 ## Many files at once
 

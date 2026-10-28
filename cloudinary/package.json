@@ -1,0 +1,14 @@
+{
+  "name": "etchv-cloudinary",
+  "engines": { "node": ">=24.2 <25" },
+  "version": "0.1.1",
+  "private": true,
+  "description": "Watermark Cloudinary image uploads with Etchv and store the watermarked copy back in Cloudinary",
+  "license": "MIT",
+  "homepage": "https://github.com/etchv-labs/integrations/tree/main/cloudinary",
+  "repository": { "type": "git", "url": "git+https://github.com/etchv-labs/integrations.git", "directory": "cloudinary" },
+  "type": "module",
+  "scripts": { "build": "tsc -p tsconfig.json", "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p test/tsconfig.json", "start": "node src/server.ts" },
+  "dependencies": { "@etchv-labs/sdk": "^1.4.0" },
+  "devDependencies": { "@types/node": "^24.19.2", "typescript": "^7.0.2" }
+}

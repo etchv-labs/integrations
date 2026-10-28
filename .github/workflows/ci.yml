@@ -20,3 +20,8 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm pack --dry-run ./n8n
+      - uses: actions/setup-python@v7.0.0
+        with:
+          python-version: '3.14'
+          check-latest: true
+      - run: python -m unittest discover -s c2pa/tests

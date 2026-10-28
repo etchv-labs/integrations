@@ -1,15 +1,18 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { test } from "node:test";
 
 const require = createRequire(import.meta.url);
-const { Etchv } = require("../dist/n8n/nodes/Etchv.node.js");
+const { Etchv, zonedTime } = require("../dist/n8n/nodes/Etchv.node.js");
 const originalFetch = globalThis.fetch;
+const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
 test("n8n submission reads binary input and outputs a job receipt", async () => {
   globalThis.fetch = async (url: URL | RequestInfo, init?: RequestInit) => {
     assert.equal(String(url), "https://api.etchv.com/watermarks/documents/async?accelerator=gpu");
     assert.equal(new Headers(init?.headers).get("X-API-Key"), "etchv_test");
+    assert.equal(new Headers(init?.headers).get("User-Agent"), `etchv-n8n/${version}`);
     assert.equal((init?.body as FormData).get("data"), '{"delivery":"001"}');
     return Response.json({ request_id: "req_1", status: "queued", status_url: "/watermarks/jobs/req_1" }, { status: 202 });
   };
@@ -156,4 +159,35 @@ test("n8n reads a batch's status by ID", async () => {
     const result = await new Etchv().execute.call(context);
     assert.deepEqual(result[0][0].json, { batch_id: batchId, status: "completed", items: [{ index: 0, status: "succeeded" }] });
   } finally { globalThis.fetch = originalFetch; }
+});
+
+test("n8n Create Traceable Link splits the recipients and outputs the link", async () => {
+  globalThis.fetch = async (url: URL | RequestInfo, init?: RequestInit) => {
+    assert.equal(String(url), "https://api.etchv.com/links");
+    assert.equal(new Headers(init?.headers).get("Idempotency-Key"), "event_000001");
+    assert.deepEqual(JSON.parse(String(init?.body)), { asset_id: "ast_" + "a".repeat(64), name: "Board pack",
+      recipients: ["alex@example.com", "sam@example.com"], expires_at: "2026-12-31T23:59:59.000Z", prepare: "on_create" });
+    return Response.json({ id: "lnk_" + "b".repeat(32), url: "https://etchv.com/l/token" }, { status: 201 });
+  };
+  try {
+    const parameters: Record<string, unknown> = { operation: "createLink", sourceAssetId: "ast_" + "a".repeat(64), linkName: "Board pack",
+      recipients: "alex@example.com,\nsam@example.com", allowedDomains: "", expiresAt: "2026-12-31T23:59:59Z", prepare: "on_create",
+      downloadLimit: 0, webhookId: "", idempotencyKey: "event_000001" };
+    const context = {
+      getInputData: () => [{ json: {} }], getCredentials: async () => ({ apiKey: "etchv_test" }),
+      getNodeParameter: (name: string) => parameters[name], getTimezone: () => "America/New_York", continueOnFail: () => false,
+    };
+    const result = await new Etchv().execute.call(context);
+    assert.equal(result[0][0].json.url, "https://etchv.com/l/token");
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test("n8n reads a picked date and time in the workflow's time zone", () => {
+  assert.equal(zonedTime("2026-12-31T17:00:00", "America/New_York"), "2026-12-31T22:00:00.000Z");
+  assert.equal(zonedTime("2026-07-01T17:00:00", "America/New_York"), "2026-07-01T21:00:00.000Z");
+  assert.equal(zonedTime("2026-07-01T17:00:00.250", "Asia/Kolkata"), "2026-07-01T11:30:00.250Z");
+  assert.equal(zonedTime("2026-12-31T17:00:00", "UTC"), "2026-12-31T17:00:00.000Z");
+  assert.equal(zonedTime("2026-12-31T17:00:00+05:30", "America/New_York"), "2026-12-31T11:30:00.000Z");
+  assert.equal(zonedTime("2026-12-31T23:59:59Z", "Europe/Berlin"), "2026-12-31T23:59:59.000Z");
+  for (const bad of ["tomorrow", "2026-13-45Z", "31/12/2026", "2026-02-30T10:00:00", "2026-12-31T25:00:00"]) assert.throws(() => zonedTime(bad, "UTC"), /Expires At/);
 });

@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Etchv watermark and detection actions for n8n",
   "license": "MIT",
-  "homepage": "https://etchv.com/docs/integrations/n8n",
+  "homepage": "https://etchv.com/docs/integrations/n8n?utm_source=n8n&utm_medium=package&utm_campaign=integrations",
   "repository": { "type": "git", "url": "git+https://github.com/etchv-labs/integrations.git", "directory": "n8n" },
   "keywords": ["n8n-community-node-package"],
   "files": ["dist"],

@@ -87,6 +87,11 @@ export type Batch = {
   items?: BatchItem[];
   [field: string]: unknown;
 };
+/** The fields a picker needs from an asset record (GET /assets). */
+export type AssetSummary = { id: string; name: string; kind: "source" | "watermarked"; media_type: "image" | "document" | "video"; [field: string]: unknown };
+export type AssetPage = { items: AssetSummary[]; next_cursor: string | null };
+/** The fields a picker needs from a storage destination (GET /storage/destinations). */
+export type StorageDestination = { id: string; name: string; provider: string; enabled: boolean; [field: string]: unknown };
 /** Signed upload URLs are credentials: never pass them on to a workflow's output. */
 function withoutUploadUrls(batch: Batch): Batch {
   if (!batch.items) return batch;
@@ -124,6 +129,44 @@ export function isIdempotencyKey(value: string): boolean {
   return /^[A-Za-z0-9_-]{8,128}$/.test(value);
 }
 
+export type LinkPrepare = "on_open" | "on_create";
+/** A traceable link to create: give recipients or allowedDomains (see https://etchv.com/docs/api/links). */
+export type LinkInput = {
+  assetId: string; name: string; recipients?: string[]; allowedDomains?: string[];
+  expiresAt?: string; prepare?: LinkPrepare; downloadLimit?: number; webhookId?: string; idempotencyKey: string;
+};
+
+/** Addresses or domains mapped as a list, or as text separated by commas, semicolons or line breaks. */
+export function addressList(value: unknown): string[] {
+  const values = Array.isArray(value) ? value : value === undefined || value === null ? [] : [value];
+  return values.flatMap((item) => String(item).split(/[,;\s]+/)).map((item) => item.trim()).filter(Boolean);
+}
+
+/** The JSON body of POST /links, checked before any request. */
+export function linkBody(input: LinkInput): Record<string, unknown> {
+  if (!/^ast_[a-f0-9]{64}$/.test(input.assetId)) throw new Error("Expected a source asset ID such as ast_….");
+  const name = String(input.name ?? "");
+  if (!/\S/.test(name) || [...name].length > 200) throw new Error("Give the link a name of up to 200 characters.");
+  const recipients = input.recipients ?? [], domains = input.allowedDomains ?? [];
+  if (!recipients.length === !domains.length) throw new Error("Give either recipients or allowed domains, not both.");
+  if (!isIdempotencyKey(input.idempotencyKey)) throw new Error("The idempotency key must be 8 to 128 letters, digits, hyphens or underscores.");
+  const body: Record<string, unknown> = { asset_id: input.assetId, name, ...(recipients.length ? { recipients } : { allowed_domains: domains }) };
+  if (input.expiresAt) body.expires_at = input.expiresAt;
+  if (input.prepare) {
+    if (input.prepare !== "on_open" && input.prepare !== "on_create") throw new Error("Prepare must be on_open or on_create.");
+    body.prepare = input.prepare;
+  }
+  if (input.downloadLimit !== undefined) {
+    if (!Number.isInteger(input.downloadLimit) || input.downloadLimit < 1 || input.downloadLimit > 100) throw new Error("The download limit must be 1 to 100.");
+    body.download_limit = input.downloadLimit;
+  }
+  if (input.webhookId) {
+    if (!/^wh_[a-f0-9]{32}$/.test(input.webhookId)) throw new Error("Expected a webhook ID such as wh_….");
+    body.webhook_id = input.webhookId;
+  }
+  return body;
+}
+
 /** Slowest upload rate a signed PUT is given time for, in bytes per second. */
 export const UPLOAD_FLOOR = 128 * 1024;
 
@@ -133,10 +176,13 @@ export class EtchvClient {
   private readonly apiKey: string;
   private readonly baseUrl: string;
   private readonly fetcher: typeof fetch;
+  private readonly userAgent?: string;
+  /** `userAgent` names the connector to the API: `etchv-<connector>/<version>`. */
   constructor(
     apiKey: string,
     baseUrl = "https://api.etchv.com",
     fetcher: typeof fetch = fetch,
+    userAgent?: string,
   ) {
     const base = new URL(baseUrl);
     if (!apiKey.startsWith("etchv_") || /[\r\n]/.test(apiKey) || base.username || base.password ||
@@ -147,13 +193,21 @@ export class EtchvClient {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
     this.fetcher = fetcher;
+    this.userAgent = userAgent;
   }
 
-  private async request(path: string, init: RequestInit = {}): Promise<Response> {
-    const url = new URL(apiPath(path), this.baseUrl);
-    const headers = new Headers(init.headers);
+  /** Headers every API request carries; signed upload URLs get neither. */
+  private apiHeaders(init?: HeadersInit): Headers {
+    const headers = new Headers(init);
     headers.set("X-API-Key", this.apiKey);
-    const response = await this.fetcher(url, { ...init, headers, redirect: "manual" });
+    if (this.userAgent) headers.set("User-Agent", this.userAgent);
+    return headers;
+  }
+
+  private async request(path: string, init: RequestInit = {}, query?: URLSearchParams): Promise<Response> {
+    const url = new URL(apiPath(path), this.baseUrl);
+    if (query) url.search = query.toString();
+    const response = await this.fetcher(url, { ...init, headers: this.apiHeaders(init.headers), redirect: "manual" });
     if (!response.ok) {
       await response.body?.cancel();
       throw new EtchvError(response.status, `Etchv returned HTTP ${response.status}.`, response.headers.get("X-Request-ID") ?? undefined);
@@ -195,7 +249,7 @@ export class EtchvClient {
     const url = new URL(path, this.baseUrl);
     const response = await this.fetcher(url, {
       method: "POST", body: form, redirect: "manual",
-      headers: { "X-API-Key": this.apiKey, "Idempotency-Key": input.idempotencyKey },
+      headers: this.apiHeaders({ "Idempotency-Key": input.idempotencyKey }),
     });
     if (response.status !== 202) {
       await response.body?.cancel();
@@ -330,6 +384,29 @@ export class EtchvClient {
     }
     return { kind: "file", bytes: await response.blob(), filename: filenameFrom(response.headers.get("Content-Disposition") ?? ""),
       ...(accelerator ? { accelerator } : {}) };
+  }
+
+  /**
+   * Create a traceable link: each recipient opens their own watermarked copy of the source asset.
+   * Retrying with the same idempotency key returns the same link.
+   */
+  async createLink(input: LinkInput): Promise<Record<string, unknown>> {
+    const body = linkBody(input);
+    return (await this.request("/links", { method: "POST", body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json", "Idempotency-Key": input.idempotencyKey } })).json();
+  }
+
+  /** One page of the workspace's assets, newest first, optionally only one kind (needs assets:read). */
+  async assets(cursor?: string, limit = 100, kind?: AssetSummary["kind"]): Promise<AssetPage> {
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (cursor) params.set("cursor", cursor);
+    if (kind) params.set("kind", kind);
+    return (await this.request("/assets", {}, params)).json();
+  }
+
+  /** The workspace's storage destinations, newest first (needs storage:read). */
+  async storageDestinations(): Promise<StorageDestination[]> {
+    return (await this.request("/storage/destinations")).json();
   }
 
   async asset(assetId: string): Promise<{ bytes: Blob; filename: string; accelerator?: Accelerator }> {

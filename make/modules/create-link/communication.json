@@ -1,0 +1,44 @@
+{
+  "url": "/links",
+  "method": "POST",
+  "type": "json",
+  "headers": {
+    "Idempotency-Key": "{{parameters.idempotency_key}}"
+  },
+  "body": {
+    "asset_id": "{{parameters.asset_id}}",
+    "name": "{{parameters.name}}",
+    "recipients": "{{ifempty(parameters.recipients, undefined)}}",
+    "allowed_domains": "{{ifempty(parameters.allowed_domains, undefined)}}",
+    "expires_at": "{{ifempty(parameters.expires_at, undefined)}}",
+    "prepare": "{{ifempty(parameters.prepare, undefined)}}",
+    "download_limit": "{{ifempty(parameters.download_limit, undefined)}}",
+    "webhook_id": "{{ifempty(parameters.webhook_id, undefined)}}"
+  },
+  "response": {
+    "output": {
+      "id": "{{body.id}}",
+      "url": "{{body.url}}",
+      "name": "{{body.name}}",
+      "asset_id": "{{body.asset_id}}",
+      "media_type": "{{body.media_type}}",
+      "status": "{{body.status}}",
+      "prepare": "{{body.prepare}}",
+      "allowed_domains": "{{body.allowed_domains}}",
+      "expires_at": "{{body.expires_at}}",
+      "download_limit": "{{body.download_limit}}",
+      "recipient_count": "{{body.recipient_count}}",
+      "credits_per_copy": "{{body.credits_per_copy}}",
+      "estimated_credits": "{{body.estimated_credits}}",
+      "batch_id": "{{body.batch_id}}",
+      "webhook_id": "{{body.webhook_id}}",
+      "created_at": "{{body.created_at}}",
+      "recipients": "{{body.recipients}}",
+      "revoked_at": "{{body.revoked_at}}"
+    },
+    "valid": "{{statusCode === 201 || statusCode === 200}}",
+    "error": {
+      "message": "Etchv returned HTTP {{statusCode}}."
+    }
+  }
+}

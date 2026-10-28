@@ -3,12 +3,14 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
 const load = (path: string): any => JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"));
-const modules = ["submit-watermark", "submit-detection", "get-job-status", "get-watermarked-file", "get-detection-result", "download-asset", "create-batch", "get-batch", "download-batch-zip"];
+const modules = ["submit-watermark", "submit-detection", "get-job-status", "get-watermarked-file", "get-detection-result", "download-asset", "create-batch", "get-batch", "download-batch-zip", "create-link"];
 
 test("Make connection checks the non-billable key endpoint without logging credentials", () => {
   const base = load("./base.json");
   const connection = load("./connection/communication.json");
   assert.equal(base.baseUrl, "https://api.etchv.com");
+  // Names the connector to the API, which maps etchv-make to its integration ID.
+  assert.match(base.headers["User-Agent"], /^etchv-make\/\d+\.\d+\.\d+$/);
   assert.equal(connection.url, "/auth/api-key");
   assert.equal(connection.headers["X-API-Key"], "{{parameters.apiKey}}");
   assert.ok(connection.log.sanitize.includes("request.headers.x-api-key"));
@@ -141,4 +143,21 @@ test("every Make module declares metadata and mappable output", () => {
     const key = load(`./modules/${module}/parameters.json`).find((item: any) => item.name === "idempotency_key");
     assert.equal(key.validate.pattern, "^[A-Za-z0-9_-]{8,128}$");
   }
+});
+
+test("Make Create Traceable Link posts JSON with one audience and the idempotency key", () => {
+  const communication = load("./modules/create-link/communication.json");
+  const parameters = load("./modules/create-link/parameters.json");
+  assert.equal(communication.url, "/links");
+  assert.equal(communication.method, "POST");
+  assert.equal(communication.type, "json");
+  assert.equal(communication.headers["Idempotency-Key"], "{{parameters.idempotency_key}}");
+  for (const name of ["recipients", "allowed_domains", "expires_at", "prepare", "download_limit", "webhook_id"])
+    assert.equal(communication.body[name], `{{ifempty(parameters.${name}, undefined)}}`, name);
+  const byName = Object.fromEntries(parameters.map((item: any) => [item.name, item]));
+  assert.equal(byName.idempotency_key.validate.pattern, "^[A-Za-z0-9_-]{8,128}$");
+  assert.match("ast_" + "a".repeat(64), new RegExp(byName.asset_id.validate.pattern));
+  for (const value of ["ast_1", "//elsewhere.test/x", "ast_" + "a".repeat(64) + "/x"]) assert.doesNotMatch(value, new RegExp(byName.asset_id.validate.pattern));
+  assert.deepEqual(byName.prepare.options.map((option: any) => option.value), ["on_open", "on_create"]);
+  assert.ok(load("./modules/create-link/interface.json").some((item: any) => item.name === "url"));
 });

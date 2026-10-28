@@ -1,5 +1,5 @@
 {
   "baseUrl": "https://api.etchv.com",
-  "headers": { "X-API-Key": "{{connection.apiKey}}" },
+  "headers": { "X-API-Key": "{{connection.apiKey}}", "User-Agent": "etchv-make/0.1.0" },
   "log": { "sanitize": ["request.headers.x-api-key"] }
 }

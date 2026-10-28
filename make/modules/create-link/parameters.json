@@ -1,0 +1,90 @@
+[
+  {
+    "name": "asset_id",
+    "label": "Source asset ID",
+    "type": "text",
+    "required": true,
+    "help": "The original in your Etchv asset library, such as the source of a file you watermarked.",
+    "validate": {
+      "pattern": "^ast_[a-f0-9]{64}$"
+    }
+  },
+  {
+    "name": "name",
+    "label": "Link name",
+    "type": "text",
+    "required": true,
+    "help": "Shown to recipients on the page they open. Up to 200 characters."
+  },
+  {
+    "name": "recipients",
+    "label": "Recipients",
+    "type": "array",
+    "spec": {
+      "type": "email",
+      "label": "Email"
+    },
+    "help": "Email addresses only, without names, up to 100. Give recipients or allowed domains, not both."
+  },
+  {
+    "name": "allowed_domains",
+    "label": "Allowed domains",
+    "type": "array",
+    "spec": {
+      "type": "text",
+      "label": "Domain"
+    },
+    "help": "Anyone with a confirmed email at exactly one of these domains may open the link, up to 10."
+  },
+  {
+    "name": "expires_at",
+    "label": "Expires at",
+    "type": "date",
+    "help": "Default 30 days from now, or sooner if the source file expires first. At most a year."
+  },
+  {
+    "name": "prepare",
+    "label": "Make copies",
+    "type": "select",
+    "options": [
+      {
+        "label": "When each recipient opens it",
+        "value": "on_open"
+      },
+      {
+        "label": "All at once, now",
+        "value": "on_create"
+      }
+    ],
+    "help": "Leave empty for the default: all at once for video and PDFs over 5 pages. Links for allowed domains always make copies when opened."
+  },
+  {
+    "name": "download_limit",
+    "label": "Downloads per recipient",
+    "type": "uinteger",
+    "validate": {
+      "min": 1,
+      "max": 100
+    },
+    "help": "1 to 100. Leave empty for no limit."
+  },
+  {
+    "name": "webhook_id",
+    "label": "Webhook ID",
+    "type": "text",
+    "help": "An Etchv webhook endpoint that receives an event each time a recipient opens the link.",
+    "validate": {
+      "pattern": "^(wh_[a-f0-9]{32})?$"
+    }
+  },
+  {
+    "name": "idempotency_key",
+    "label": "Idempotency key",
+    "type": "text",
+    "required": true,
+    "help": "Map a stable source event ID. Reuse the same value on retry to get the same link back.",
+    "validate": {
+      "pattern": "^[A-Za-z0-9_-]{8,128}$"
+    }
+  }
+]

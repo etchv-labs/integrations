@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { EtchvClient, EtchvError, MAX_UPLOAD_MB, acceleratorInput, apiPath, batchMedia, filenameFrom } from "./etchv.ts";
+import { EtchvClient, EtchvError, MAX_UPLOAD_MB, acceleratorInput, addressList, apiPath, batchMedia, filenameFrom, linkBody } from "./etchv.ts";
 
 test("connection check is authenticated and does not submit a billable operation", async () => {
   const calls: string[] = [];
@@ -130,7 +130,7 @@ test("download filenames prefer the encoded display name and never contain a pat
   assert.equal(filenameFrom(""), "watermarked-file");
 });
 
-test("files above 40 MB go through an upload session without the API key", async () => {
+test("files above 40 MB go through an upload session without the API key or User-Agent", async () => {
   const calls: string[] = [];
   const uploadId = "upl_" + "1".repeat(32);
   const client = new EtchvClient("etchv_test", "https://api.etchv.com", async (url, init) => {
@@ -138,18 +138,21 @@ test("files above 40 MB go through an upload session without the API key", async
     calls.push(`${init?.method} ${target.host}${target.pathname}`);
     if (target.pathname === "/uploads") {
       assert.equal(new Headers(init?.headers).get("X-API-Key"), "etchv_test");
+      assert.equal(new Headers(init?.headers).get("User-Agent"), "etchv-test/1.0.0");
       assert.deepEqual(JSON.parse(String(init?.body)), { kind: "detect", filename: "delivered.png", size: 41 * 1024 * 1024 });
       return Response.json({ upload_id: uploadId, upload: { method: "PUT", url: `https://uploads.etchv.com/detect/${uploadId}.png?Signature=s` } }, { status: 201 });
     }
     if (target.host === "uploads.etchv.com") {
       assert.equal(new Headers(init?.headers).get("X-API-Key"), null);
+      assert.equal(new Headers(init?.headers).get("User-Agent"), null);
       return new Response(null, { status: 200 });
     }
+    assert.equal(new Headers(init?.headers).get("User-Agent"), "etchv-test/1.0.0");
     const body = init?.body as FormData;
     assert.equal(body.get("upload_id"), uploadId);
     assert.equal(body.get("file"), null);
     return Response.json({ request_id: "req_1", status: "queued" }, { status: 202 });
-  });
+  }, "etchv-test/1.0.0");
   const receipt = await client.submit({ media: "images", operation: "detect", filename: "delivered.png",
     bytes: new Blob([new Uint8Array(41 * 1024 * 1024)]), idempotencyKey: "source_event_002" });
   assert.equal(receipt.request_id, "req_1");
@@ -304,4 +307,54 @@ test("a signed upload URL must be HTTPS and carry no credentials", async () => {
     { method: "PUT", url: "https://user:pass@uploads.etchv.com/x" }, { method: "PUT", url: "not a url" }, null]) {
     await assert.rejects(client.putSigned(upload, new Blob(["x"])), /invalid upload session/);
   }
+});
+
+const sourceAsset = "ast_" + "a".repeat(64);
+
+test("createLink posts the link with its idempotency key and returns it", async () => {
+  const calls: { url: string; key: string | null; body: unknown }[] = [];
+  const client = new EtchvClient("etchv_test", "https://api.etchv.com", async (url, init) => {
+    calls.push({ url: String(url), key: new Headers(init?.headers).get("Idempotency-Key"), body: JSON.parse(String(init?.body)) });
+    assert.equal(new Headers(init?.headers).get("Content-Type"), "application/json");
+    return Response.json({ id: "lnk_" + "b".repeat(32), url: "https://etchv.com/l/token", status: "active" }, { status: 201 });
+  });
+  const link = await client.createLink({ assetId: sourceAsset, name: "Board pack", recipients: ["alex@example.com"],
+    expiresAt: "2026-12-31T23:59:59Z", prepare: "on_open", downloadLimit: 3, webhookId: "wh_" + "c".repeat(32), idempotencyKey: "event_000001" });
+  assert.equal(link.url, "https://etchv.com/l/token");
+  assert.deepEqual(calls, [{ url: "https://api.etchv.com/links", key: "event_000001", body: { asset_id: sourceAsset, name: "Board pack",
+    recipients: ["alex@example.com"], expires_at: "2026-12-31T23:59:59Z", prepare: "on_open", download_limit: 3, webhook_id: "wh_" + "c".repeat(32) } }]);
+});
+
+test("a link refused by the API is an EtchvError with its status", async () => {
+  const client = new EtchvClient("etchv_test", "https://api.etchv.com", async () => Response.json({ detail: { code: "insufficient_credits" } }, { status: 402 }));
+  await assert.rejects(client.createLink({ assetId: sourceAsset, name: "Board pack", allowedDomains: ["example.com"], idempotencyKey: "event_000001" }),
+    (error: unknown) => error instanceof EtchvError && error.status === 402);
+});
+
+test("link input is checked before any request", () => {
+  const base = { assetId: sourceAsset, name: "Board pack", recipients: ["a@b.co"], idempotencyKey: "event_000001" };
+  assert.deepEqual(linkBody({ ...base, name: "📄".repeat(200) }).name, "📄".repeat(200));
+  for (const [input, rule] of [[{ ...base, assetId: "ast_1" }, /source asset ID/], [{ ...base, name: " " }, /name/],
+    [{ ...base, name: "📄".repeat(201) }, /name/], [{ ...base, recipients: [] }, /either recipients/],
+    [{ ...base, allowedDomains: ["b.co"] }, /either recipients/], [{ ...base, idempotencyKey: "short" }, /idempotency key/],
+    [{ ...base, downloadLimit: 0 }, /download limit/], [{ ...base, downloadLimit: 101 }, /download limit/],
+    [{ ...base, webhookId: "wh_1" }, /webhook ID/], [{ ...base, prepare: "later" as never }, /Prepare/]] as const)
+    assert.throws(() => linkBody(input), rule);
+  assert.deepEqual(addressList("a@b.co, c@d.co;\ne@f.co"), ["a@b.co", "c@d.co", "e@f.co"]);
+  assert.deepEqual(addressList(["a@b.co", " c@d.co,e@f.co "]), ["a@b.co", "c@d.co", "e@f.co"]);
+  assert.deepEqual(addressList(undefined), []);
+});
+
+test("asset and storage destination listings read one page each for pickers", async () => {
+  const calls: string[] = [];
+  const client = new EtchvClient("etchv_test", "https://api.etchv.com", async (url) => {
+    calls.push(String(url));
+    if (String(url).includes("/storage/")) return Response.json([{ id: "dst_1", name: "Archive", provider: "s3", enabled: true }]);
+    return Response.json({ items: [{ id: "ast_1", name: "a.png", kind: "watermarked", media_type: "image" }], next_cursor: "c2" });
+  });
+  assert.deepEqual((await client.assets()).next_cursor, "c2");
+  assert.equal((await client.assets("c2", 25)).items[0].id, "ast_1");
+  assert.deepEqual((await client.storageDestinations()).map((d) => d.id), ["dst_1"]);
+  assert.deepEqual(calls, ["https://api.etchv.com/assets?limit=100", "https://api.etchv.com/assets?limit=25&cursor=c2",
+    "https://api.etchv.com/storage/destinations"]);
 });

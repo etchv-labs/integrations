@@ -1,0 +1,152 @@
+[
+  {
+    "name": "id",
+    "label": "Link ID",
+    "type": "text"
+  },
+  {
+    "name": "url",
+    "label": "Link URL",
+    "type": "url"
+  },
+  {
+    "name": "name",
+    "label": "Name",
+    "type": "text"
+  },
+  {
+    "name": "asset_id",
+    "label": "Source asset ID",
+    "type": "text"
+  },
+  {
+    "name": "media_type",
+    "label": "Media type",
+    "type": "text"
+  },
+  {
+    "name": "status",
+    "label": "Status",
+    "type": "text"
+  },
+  {
+    "name": "prepare",
+    "label": "Make copies",
+    "type": "text"
+  },
+  {
+    "name": "allowed_domains",
+    "label": "Allowed domains",
+    "type": "array",
+    "spec": {
+      "type": "text"
+    }
+  },
+  {
+    "name": "expires_at",
+    "label": "Expires at",
+    "type": "date"
+  },
+  {
+    "name": "download_limit",
+    "label": "Downloads per recipient",
+    "type": "number"
+  },
+  {
+    "name": "recipient_count",
+    "label": "Recipient count",
+    "type": "number"
+  },
+  {
+    "name": "credits_per_copy",
+    "label": "Credits per copy",
+    "type": "number"
+  },
+  {
+    "name": "estimated_credits",
+    "label": "Estimated credits",
+    "type": "number"
+  },
+  {
+    "name": "batch_id",
+    "label": "Batch ID",
+    "type": "text"
+  },
+  {
+    "name": "webhook_id",
+    "label": "Webhook ID",
+    "type": "text"
+  },
+  {
+    "name": "created_at",
+    "label": "Created at",
+    "type": "date"
+  },
+  {
+    "name": "revoked_at",
+    "label": "Revoked at",
+    "type": "date"
+  },
+  {
+    "name": "recipients",
+    "label": "Recipients",
+    "type": "array",
+    "spec": {
+      "type": "collection",
+      "spec": [
+        {
+          "name": "email",
+          "label": "Email",
+          "type": "email"
+        },
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "text"
+        },
+        {
+          "name": "opened_at",
+          "label": "First opened at",
+          "type": "date"
+        },
+        {
+          "name": "last_opened_at",
+          "label": "Last opened at",
+          "type": "date"
+        },
+        {
+          "name": "open_count",
+          "label": "Opens",
+          "type": "number"
+        },
+        {
+          "name": "download_count",
+          "label": "Downloads",
+          "type": "number"
+        },
+        {
+          "name": "copy",
+          "label": "Copy",
+          "type": "collection",
+          "spec": [
+            {
+              "name": "status",
+              "label": "Status",
+              "type": "text"
+            },
+            {
+              "name": "asset_id",
+              "label": "Asset ID",
+              "type": "text"
+            },
+            {
+              "name": "error_code",
+              "label": "Error code",
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
